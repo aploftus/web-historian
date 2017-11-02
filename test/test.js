@@ -15,7 +15,7 @@ archive.initialize({
 
 var request = supertest.agent(server);
 
-describe('server', function() {
+describe('SERVER', function() {
   describe('GET /', function () {
     it('should return the content of index.html', function (done) {
       // just assume that if it contains an <input> tag its index.html
@@ -25,7 +25,7 @@ describe('server', function() {
     });
   });
 
-  describe('archived websites', function () {
+  describe('ARCHIVED WEBSITES', function () {
     describe('GET', function () {
       it('should return the content of a website from the archive', function (done) {
         var fixtureName = 'www.google.com';
@@ -33,6 +33,14 @@ describe('server', function() {
 
         // Create or clear the file.
         var fd = fs.openSync(fixturePath, 'w');
+        // 'w': open for writing, erases contents of file if exists
+        // 'w+': write and read; create if file doesn't exist; erases contents of file if exists
+        // looks like if we use W at all, file gets erased. Use A instead if trying to add on to file.
+        // 'r': read
+        // 'r+': read and write; throw exception error if file doesn't exist
+        // 'a': append; maybe useful for adding to URL so don't need to keep track
+        // 'a+': read and append; DOES NOT WORK FOR MACOS AND LINUX
+        
         fs.writeSync(fd, 'google');
         fs.closeSync(fd);
 
@@ -76,7 +84,7 @@ describe('server', function() {
   });
 });
 
-describe('archive helpers', function() {
+describe('ARCHIVE HELPERS', function() {
   describe('#readListOfUrls', function () {
     it('should read urls from sites.txt', function (done) {
       var urlArray = ['example1.com', 'example2.com'];

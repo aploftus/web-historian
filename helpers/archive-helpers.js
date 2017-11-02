@@ -10,8 +10,12 @@ var _ = require('underscore');
  */
 
 exports.paths = {
+  // __dirname: pwd
+  // shorthand ways of writing pathnames to our home dir
   siteAssets: path.join(__dirname, '../web/public'),
+  // archive folder
   archivedSites: path.join(__dirname, '../archives/sites'),
+  // list of url to archive
   list: path.join(__dirname, '../archives/sites.txt')
 };
 
@@ -26,16 +30,21 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
+  // webapp AND worker
 };
 
 exports.isUrlInList = function(url, callback) {
+  // webapp
 };
 
 exports.addUrlToList = function(url, callback) {
+  // webapp
 };
 
 exports.isUrlArchived = function(url, callback) {
+  // webapp AND worker?
 };
 
-exports.downloadUrls = function(urls) {
+exports.archiveUrls = function(urls) {
+  // worker
 };
