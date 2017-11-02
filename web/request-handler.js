@@ -4,9 +4,6 @@ var path = require('path');
 var archive = require('../helpers/archive-helpers');
 
 exports.handleRequest = function (req, res) {
-  var statusCode = 200;
-  console.log('URL: ', req.url);
-  
   if (req.url === '/') {
     var sitePath = archive.paths.siteAssets + '/index.html';
   } else {
@@ -16,23 +13,13 @@ exports.handleRequest = function (req, res) {
   if (sitePath) {
     fs.readFile(sitePath, (err, data) => {
       if (!err) {
-        res.writeHead(statusCode, headers);
+        res.writeHead(200, headers);
         res.end(data);
       } else {
-        console.log('ERROR : ', err);
+        res.writeHead(404, headers);
+        res.end();
       }
     });
   }
-  
-  // if path is GET / => if URL path === /
-  // then respond back with index.html in response.end()
-    // paths.siteAssets
-  
-  
-  // if path is GET, then return website content from archive
-  // write to the head with statusCode and headers
-  // write body, loading.html
-    // once URL is archived, send back archived page
-  
   // res.end(archive.paths.list); 
 };
