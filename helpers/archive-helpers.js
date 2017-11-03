@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
+var archive = require('../helpers/archive-helpers');
 
 /*
  * You will need to reuse the same paths many times over in the course of this sprint.
@@ -31,20 +32,45 @@ exports.initialize = function(pathsObj) {
 
 exports.readListOfUrls = function(callback) {
   // webapp AND worker
+  // should read urls from sites.txt
+  // should invoke the callback on the sites.txt data (in an array format - split on newline)
+  fs.readFile(exports.paths.list, (err, data) => {
+    if (!err) {
+      callback(data);
+    } else {
+      console.log(err);
+    }    
+  });
 };
 
 exports.isUrlInList = function(url, callback) {
   // webapp
+  // should check if a url is in the list
+  // first we should readListOfUrls
+    // our readList callback would verify a match to return true
+  // our isUrl callback would then be called on the boolean  
+  exports.readListOfUrls((data) => {
+    var urls = data.split('\n');
+    callback(urls.includes(url));
+  });
 };
 
 exports.addUrlToList = function(url, callback) {
-  // webapp
+  // should add a url to the list
+  // should check isUrlInList. if not,
+  exports.isUrlInList(url, fs.appendFile(archive.paths.list, url + '\n', callback));
 };
 
 exports.isUrlArchived = function(url, callback) {
   // webapp AND worker?
+  // should report whether or not path to that site exists?
 };
 
 exports.archiveUrls = function(urls) {
   // worker
+  // should check if a url is archived
+};
+
+exports.downloadUrls = function(urlArray) {
+  // should download all pending urls in the list
 };
