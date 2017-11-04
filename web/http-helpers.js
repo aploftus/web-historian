@@ -17,7 +17,7 @@ exports.serveAssets = (res, asset, callback) => {
   // if asset is in public
   fs.readFile(archive.paths.siteAssets + asset, encoding, (err, data) => {
     if (err) { // if asset not in public
-      fs.readFile(archive.paths.archivedSites + asset, encoding, (err, data) => {
+      fs.readFile(archive.paths.archivedSites + '/' + asset, encoding, (err, data) => {
         if (err) { // if asset not archived yet
           callback ? callback() : exports.send404(res);
         } else {
@@ -33,7 +33,7 @@ exports.serveAssets = (res, asset, callback) => {
 exports.sendResponse = (response, data, statusCode) => {
   statusCode = statusCode || 200;
   response.writeHead(statusCode, exports.headers);
-  response.end(JSON.stringify(data));
+  response.end(data); // can't send stringified, because it's already a string when read
 };
 
 exports.collectData = (request, callback) => {
@@ -47,7 +47,7 @@ exports.collectData = (request, callback) => {
 };
 
 exports.send404 = (response) => {
-  exports.sendResponse(response, 'Page not found', 404);
+  exports.sendResponse(response, '404: Page not found', 404);
 };
 
 exports.sendRedirect = (response) => {

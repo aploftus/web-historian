@@ -10,12 +10,14 @@ var actions = {
     var urlPath = url.parse(req.url).pathname;
     if (urlPath === '/') { urlPath = '/index.html'; }
 
-    utils.serveAssets(res, urlPath);
+    console.log(urlPath);
+    utils.serveAssets(res, '/' + urlPath);
   },
 
   'POST': function(req, res) {
     utils.collectData(req, function(data) {
       var url = data.split('=')[1];
+      console.log('POST URL ', url);
       archive.isUrlInList(url, function(inList) {
         if (inList) {
           archive.isUrlArchived(url, function(exists) {
