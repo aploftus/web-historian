@@ -1,84 +1,46 @@
 var fs = require('fs');
-var httpHelpers = require('./http-helpers');
+var utils = require('./http-helpers');
 var path = require('path');
 var archive = require('../helpers/archive-helpers');
+var url = require('url');
+
+
+var actions = {
+  'GET': function(req, res) {
+    var urlPath = url.parse(req.url).pathname;
+    if (urlPath === '/') { urlPath = '/index.html'; }
+
+    utils.serveAssets(res, urlPath);
+  },
+
+  'POST': function(req, res) {
+    utils.collectData(req, function(data) {
+      var url = data.split('=')[1];
+      archive.isUrlInList(url, function(inList) {
+        if (inList) {
+          archive.isUrlArchived(url, function(exists) {
+            if (exists) {
+              utils.serveAssets(res, url);
+            } else {
+              utils.sendRedirect(res);
+            }
+          });
+        } else {
+          archive.addUrlToList(url, function() {
+            utils.sendRedirect(res);
+          });
+        }
+      });
+    });
+  }
+};
 
 exports.handleRequest = function (req, res) {
-  if (req.url === '/') {
-    var sitePath = archive.paths.siteAssets + '/index.html';
+  if (actions[req.method]) {
+    actions[req.method](req, res);
   } else {
-    var sitePath = archive.paths.archivedSites + req.url;
+    utils.send404(res);
   }
-  
-  // httpHelpers.serveAssets(res, sitePath, () => {
-  //   fs.readFile(sitePath, (err, data) => {
-  //     if (!err) {
-  //       return data
-  //       // res.writeHead(200, httpHelpers.headers);
-  //       // res.end(data);
-  //     } else {
-  //       res.writeHead(404, httpHelpers.headers);
-  //       res.end();
-  //     }
-  //   });
-  // });
-  
-  if (req.method === 'GET' && sitePath) {
-    fs.readFile(sitePath, (err, data) => {
-      if (!err) {
-        res.writeHead(200, httpHelpers.headers);
-        res.end(data);
-      } else {
-        res.writeHead(404, httpHelpers.headers);
-        res.end();
-      }
-    });
-  }
-  
-  if (req.method === 'POST') {
-    // if user submits an already archived page
-    // auto-redirect to archived version of that page
-    // or to loading.html if the page has not yet been loaded
-    
-    var body = '';
-    req.on('data', (chunk) => {
-      body += chunk;
-    });
-    
-    req.on('end', () => {
-      console.log(body.hostname);
-      archive.addUrlToList(body.slice(4), (err) => {
-        if (err) {
-          console.log(err);
-          throw err;
-        }
-        // I think this is happening asynchronously
-        // because it's not logging an error, it's simply not
-        // appending in time for the test to finish. hmm.
-      });
-    });
-      
-    res.writeHead(302, httpHelpers.headers); // is statusCode 302?
-    res.end();
-    
-      
-    /* 
-      app.post('/', function(req, res) {
-        res.redirect(statusCode, /pathToRedirect);
-        
-        is statusCode === 302?      
-      });
-    */
-  }
-  
-  // console.log('URL: ', req.url);
-  // write to archive.paths.list
-  // use a request listener to grab data
-  // send back loading.html, and then the archived site
-    
-  
-  
-  // res.end(archive.paths.list); 
 };
 
 

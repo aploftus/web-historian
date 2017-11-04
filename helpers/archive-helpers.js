@@ -31,39 +31,30 @@ exports.initialize = function(pathsObj) {
 // modularize your code. Keep it clean!
 
 exports.readListOfUrls = function(callback) {
-  // webapp AND worker
-  // should read urls from sites.txt
-  // should invoke the callback on the sites.txt data (in an array format - split on newline)
-  fs.readFile(exports.paths.list, (err, data) => {
+  fs.readFile(exports.paths.list, {encoding: 'utf8'}, (err, sites) => {
     if (!err) {
-      callback(data);
+      callback(sites.split('\n'));
     } else {
       console.log(err);
     }    
   });
 };
 
-exports.isUrlInList = function(url, callback) {
-  // webapp
-  // should check if a url is in the list
-  // first we should readListOfUrls
-    // our readList callback would verify a match to return true
-  // our isUrl callback would then be called on the boolean  
-  exports.readListOfUrls((data) => {
-    var urls = data.split('\n');
-    callback(urls.includes(url));
+exports.isUrlInList = function(url, callback) { 
+  exports.readListOfUrls((sites) => {
+    callback(sites.includes(url));
   });
 };
 
 exports.addUrlToList = function(url, callback) {
-  // should add a url to the list
-  // should check isUrlInList. if not,
-  exports.isUrlInList(url, fs.appendFile(archive.paths.list, url + '\n', callback));
+  fs.appendFile(archive.paths.list, url + '\n', () => callback());
 };
 
 exports.isUrlArchived = function(url, callback) {
-  // webapp AND worker?
-  // should report whether or not path to that site exists?
+  var path = exports.paths.archivedSites + '/' + url;
+  fs.access(path, (err) => {
+    callback(!err);
+  });
 };
 
 exports.archiveUrls = function(urls) {

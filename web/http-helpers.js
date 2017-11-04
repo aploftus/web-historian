@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var archive = require('../helpers/archive-helpers');
+var utils = require('./http-helpers');
 
 exports.headers = {
   'access-control-allow-origin': '*',
@@ -10,19 +11,50 @@ exports.headers = {
   'Content-Type': 'text/html'
 };
 
-exports.serveAssets = function(res, asset, callback) {
-  // Write some code here that helps serve up your static files!
-  // (Static files are things like html (yours or archived from others...),
-  // css, or anything that doesn't change often.)
-  // var data = callback(asset);
-  // res.writeHead(200, exports.headers);
-  // res.end(data);
+exports.serveAssets = (res, asset, callback) => {
+  var encoding = {encoding: 'utf8'};
+  // waterfall through scenarios
+  // if asset is in public
+  fs.readFile(archive.paths.siteAssets + asset, encoding, (err, data) => {
+    if (err) { // if asset not in public
+      fs.readFile(archive.paths.archivedSites + asset, encoding, (err, data) => {
+        if (err) { // if asset not archived yet
+          callback ? callback() : exports.send404(res);
+        } else {
+          exports.sendResponse(res, data);
+        }
+      });
+    } else {
+      exports.sendResponse(res, data);
+    }
+  });
 };
 
+exports.sendResponse = (response, data, statusCode) => {
+  statusCode = statusCode || 200;
+  response.writeHead(statusCode, exports.headers);
+  response.end(JSON.stringify(data));
+};
 
+exports.collectData = (request, callback) => {
+  var data = '';
+  request.on('data', (chunk) => {
+    data += chunk;
+  });
+  request.on('end', () => {
+    callback(data);
+  });
+};
 
-// As you progress, keep thinking about what helper functions you can put here!
+exports.send404 = (response) => {
+  exports.sendResponse(response, 'Page not found', 404);
+};
 
-// could have a send response helper
-
-// and a collectdata helper
+exports.sendRedirect = (response) => {
+  var loadingPath = archive.paths.siteAssets + '/loading.html';
+  fs.readFile(loadingPath, {encoding: 'utf8'}, function(err, data) {
+    if (!err) {
+      exports.sendResponse(response, data, 302);
+    }
+  });
+};
