@@ -9,8 +9,6 @@ var actions = {
   'GET': function(req, res) {
     var urlPath = url.parse(req.url).pathname;
     if (urlPath === '/') { urlPath = '/index.html'; }
-
-    console.log(urlPath);
     utils.serveAssets(res, '/' + urlPath);
   },
 
